@@ -1,9 +1,17 @@
 K01
 - Khởi tạo một k8s cluster: 
- - kubeadm init --apiserver-advertise-address=192.168.56.2 --pod-network-cidr=192.168.0.0/16
- - mkdir -p $HOME/.kube
- - sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
- - sudo chown $(id -u):$(id -g) $HOME/.kube/config
- - kubectl create -f https://projectcalico.docs.tigera.io/manifests/tigera-operator.yaml
- - kubectl create -f https://projectcalico.docs.tigera.io/manifests/custom-resources.yaml
- 
+ - ```kubeadm init --apiserver-advertise-address=192.168.56.2 --pod-network-cidr=192.168.0.0/16```
+ - ```mkdir -p $HOME/.kube```
+ - ```sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config```
+ - ``` sudo chown $(id -u):$(id -g) $HOME/.kube/config ```
+ - ```kubectl create -f https://projectcalico.docs.tigera.io/manifests/tigera-operator.yaml```
+ - ```kubectl create -f https://projectcalico.docs.tigera.io/manifests/custom-resources.yaml```
+ - Xem thông tin cluster:  ```kubectl cluster-info```
+ - Xem thông tin token để join vào cluster: ```kubeadm token create --print-join-command```
+ - Tại master, muốn xem thông tin các node: ```kubectl get node```
+ - Xem thông tin một node: ```kubectl describe node/[node name]```
+ - Xem thông tin cấu hình của kubectl: ```kubectl config view```. gồm context (cluster name, user)
+   - Nội dung file config sẽ lưu thông tin của cluster. copy thư mục này từ máy master sang máy local thì có thể điều khiển cluster từ local
+ - Xem thông tin context đang được sử dụng: ```kubectl config get-contexts```
+ - Sử dụng một context khác: ```kubectl config use-context [context-name]```
+ - Kiểm tra cluster có những pod nào đang chạy ở namespace mặc định: ```kubectl get po```. Xem toàn bộ namespace: ```kubectl get po -A```
