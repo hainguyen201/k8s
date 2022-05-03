@@ -1,0 +1,12 @@
+Log created: 2022-05-02T15:58:38.113657000Z
+Process ID:  4715 (0x126b)
+Parent PID:  1861 (0x745)
+Executable:  /usr/lib/virtualbox/VBoxHeadless
+Arg[0]: /usr/lib/virtualbox/VBoxHeadless
+Arg[1]: --comment
+Arg[2]: worker1.xtl
+Arg[3]: --startvm
+Arg[4]: 7da3a5a9-39a2-45eb-a869-a008495f9ca0
+Arg[5]: --vrde
+Arg[6]: config
+AddRef: illegal refcnt=3221225469 state=2
