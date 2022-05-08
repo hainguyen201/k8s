@@ -4,7 +4,7 @@
 # Tạo máy ảo từ box centos/7, gán địa chỉ IP, đặt hostname, gán 2GB bộ nhớ, 2 cpus  
 Vagrant.configure("2") do |config|
   config.vm.box = "centos/7"
-  config.vm.network "public_network", use_dhcp_assigned_default_route: true
+  config.vm.network "private_network", ip: "192.168.56.2"
   config.vm.hostname = "master.xtl"
 
 
@@ -25,9 +25,9 @@ Vagrant.configure("2") do |config|
     systemctl reload sshd
 # Ghi nội dung sau ra file /etc/hosts để truy cập được các máy theo HOSTNAME
 cat >>/etc/hosts<<EOF
-192.168.56.101 master.xtl
-192.168.56.102 worker1.xtl
-192.168.56.103 worker2.xtl
+192.168.56.2 master.xtl
+192.168.56.3 worker1.xtl
+192.168.56.4 worker2.xtl
 EOF
 
   SHELL
