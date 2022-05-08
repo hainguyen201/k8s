@@ -5,7 +5,10 @@
 # Cai dat Docker
 yum install -y yum-utils device-mapper-persistent-data lvm2
 yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
-yum update -y && yum install docker-ce-18.06.2.ce -y
+yum update -y 
+# yum install docker-ce-18.06.2.ce -y
+
+yum install docker-ce -y
 usermod -aG docker $(whoami)
 
 ## Create /etc/docker directory.
@@ -64,6 +67,8 @@ gpgcheck=1
 repo_gpgcheck=0
 gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
 EOF
+
+
 
 yum install -y -q kubeadm kubelet kubectl
 
