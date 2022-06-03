@@ -15,7 +15,7 @@ Vagrant.configure("2") do |config|
   end
   
   # Chạy file install-containerd-kube.sh sau khi nạp Box
-  config.vm.provision "shell", path: "./../install-containerd-kube.sh"
+  config.vm.provision "shell", path: "./../installcontainerd.sh"
 
   # Chạy các lệnh shell
   config.vm.provision "shell", inline: <<-SHELL

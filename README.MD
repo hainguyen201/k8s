@@ -1,6 +1,6 @@
 K01
 - Khởi tạo một k8s cluster: 
- - ```kubeadm init --apiserver-advertise-address=192.168.56.2 --pod-network-cidr=192.168.0.0/16 --cri-socket=unix:///var/run/cri-dockerd.sock```
+ - ```kubeadm init --apiserver-advertise-address=192.168.56.2 --pod-network-cidr=192.168.0.0/16 --cri-socket=unix:///var/run/containerd/containerd.sock```
  - ```mkdir -p $HOME/.kube```
  - ```sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config```
  - ```sudo chown $(id -u):$(id -g) $HOME/.kube/config```

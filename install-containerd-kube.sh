@@ -24,7 +24,12 @@ sudo sysctl --system
 
 yum install wget -y
 wget https://github.com/containerd/containerd/releases/download/v1.6.4/containerd-1.6.4-linux-amd64.tar.gz
-tar Cxzvf /usr/local containerd-1.6.2-linux-amd64.tar.gz
+tar Cxzvf /usr/local containerd-1.6.4-linux-amd64.tar.gz
+
+mkdir -p /usr/local/lib/systemd/system
+wget -O /usr/local/lib/systemd/system/containerd.service https://raw.githubusercontent.com/containerd/containerd/main/containerd.service
+chmod +x /usr/local/lib/systemd/system/containerd.service
+
 systemctl daemon-reload
 systemctl enable --now containerd
 
@@ -41,7 +46,7 @@ cat  >>/etc/containerd/config.toml<<EOF
     SystemdCgroup = true
 EOF
 
-sudo systemctl restart containerd
+sudo systemctl status containerd
 
 
 
