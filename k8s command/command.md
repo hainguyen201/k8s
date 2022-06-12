@@ -1,6 +1,6 @@
-Lệnh cơ bản trong k8s
+# Lệnh cơ bản trong k8s
 
-- kubectl kết nối đến các cluster thông qua config
+## kubectl kết nối đến các cluster thông qua config
   - kubectl config view: xem thông tin của các cluster 
   - Để kết nối thêm các cluster khác, xem thư mục ~/.kube/config của cluster muốn kết nối thêm (ở máy master).
     - Copy file config từ cluster đấy đến máy host.
@@ -12,7 +12,7 @@ Lệnh cơ bản trong k8s
   
  - Xem các context (ngữ cảnh): kubectl config get-contexts
  - Chuyển context: kubectl config use-context [context-name]
-- k8s dashboard:
+## k8s dashboard:
   - Tải file https://raw.githubusercontent.com/kubernetes/dashboard/v2.5.0/aio/deploy/recommended.yaml
   - Tìm đến kind là service và sửa như sau: Thêm type:Nodeport và thêm cổng nodeport:
   - ```
