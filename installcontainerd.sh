@@ -1,3 +1,6 @@
+yum update -y
+yum install sudo -y
+
 cat <<EOF | sudo tee /etc/modules-load.d/containerd.conf
 overlay
 br_netfilter

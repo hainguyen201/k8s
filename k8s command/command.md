@@ -41,8 +41,8 @@ Lệnh cơ bản trong k8s
     #   namespace: kubernetes-dashboard
     # type: Opaque 
     ```
-  - Chạy lệnh sau để triển khai dashboard trên 
-  - kiểm tra pod trên namespace kubenertes-dashboard
+  - Chạy lệnh sau để triển khai dashboard trên: kubectl apply -f dashboard.yaml
+  - kiểm tra pod trên namespace kubenertes-dashboard: kubectl get po -n kubernetes-dashboard
   - Tạo cert riêng:
     - mkdir certs
     - chmod 777 certs
@@ -58,4 +58,47 @@ Lệnh cơ bản trong k8s
       - kubectl apply -f admin-user.yaml: chạy service account admin-user
       - kubectl get secreate -n kubenertes-dashboard: xem danh sách các servicem, copy tên của service admin-user vừa tạo (admin-user-token-xpwdc)
       - kubectl describe secret/admin-user-token-xpwdc -n kubernetes-dashboard: Xem thông tin cụ thể của secret admin-user và copy token. Sử dụng token này để đăng nhập vào kubernetes-dashboard
-      - 
+- Kubectl
+  - Cấu trúc chung: 
+    - kubectl [command] [type] [name] [flags]
+    - command: là lênh, hành động như get, apply , delete, describe
+    - type: kiểu tài nguyên như: ns, no, po, svc. Lệnh kubectl api-resources để xem thông tin các loại tài nguyên
+    - name: tên đối tượng tác động
+    - flags: các thiết lập tùy chỉnh
+  - kubectl get no -o wide: xem thống tin của các node dạng cụ thể
+- Pod, node trong k8s
+  - k8s bọc các containers với nhau trong một cấu trúc là pod. Các container cùng pod sẽ chia sẻ với nhau tài nguyên và mạng cục bộ của pod
+  - pod là đơn vị nhỏ nhất để k8s thực hiện việc nhân bản
+  - pod có nhiều container mà pod là đơn vị để scale nên nếu có thể thì cấu hình ứng dụng sao cho một pod có ít container nhất càng tốt
+    - Cách sử dụng hiệu quả và thông dụng nhất là 1 pod chứa 1 container
+    - pod loại chạy nhiều container trong đó thường đóng gói 1 ứng dụng xây dựng với sự phối hợp chặt chẽ từ nhiều container trong một khu vực cách ly, chúng chia sẻ tài nguyên ổ đĩa, mạng cho nhau
+  - file manifest.yaml:
+    - Là nơi khai báo các thành phần của container như pod, nodeport, service,...
+    - Ví dụ:
+      - Tạo file 1-swarmtest-node.yaml có nội dung
+      - ```
+        apiVersion: v1 #
+        kind: Pod
+        metadata:
+          labels:
+            app: app1
+            ungdung: ungdung1
+          name: ungdungnode
+        spec:
+          containers:
+          - name: c1
+            image: ichte/swarmtest:node
+            resources:
+              limits:
+                memory: "150M" # sử dụng 150MB bộ nhớ
+                cpu: "100m" # 1 core tương ứng với 1000m
+            ports:
+              - containerPort: 8085
+        ```
+      - apiVersion: version
+      - kind: đại diện cho loại tài nguyên
+      - metadata: 
+      - spec: mô tả thông tin của pod
+  - Xem mô tả của pod: kubectl describe po/[pod name]
+  - Xem các sự kiện xảy ra trên cluster: kubectl get events
+  - Xem thông tin file yaml của pod: kubectl get po/[pod name] -o yaml

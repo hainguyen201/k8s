@@ -1,0 +1,13 @@
+apiVersion: v1 
+kind: Pod
+metadata:
+  labels:
+    app: tools
+  name: tools
+spec:
+  containers:
+  - name: tools
+    image: ichte/coretools
+    resources: {}
+    command: ["bin/bash"]
+    args: ["-c", "while true; do echo 'core tools running'; sleep 10; done"]
