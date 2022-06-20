@@ -1,6 +1,6 @@
 # Lệnh cơ bản trong k8s
 
-## kubectl kết nối đến các cluster thông qua config
+## 1. kubectl kết nối đến các cluster thông qua config
   - kubectl config view: xem thông tin của các cluster 
   - Để kết nối thêm các cluster khác, xem thư mục ~/.kube/config của cluster muốn kết nối thêm (ở máy master).
     - Copy file config từ cluster đấy đến máy host.
@@ -12,7 +12,7 @@
   
  - Xem các context (ngữ cảnh): kubectl config get-contexts
  - Chuyển context: kubectl config use-context [context-name]
-## k8s dashboard:
+## 2. k8s dashboard:
   - Tải file https://raw.githubusercontent.com/kubernetes/dashboard/v2.5.0/aio/deploy/recommended.yaml
   - Tìm đến kind là service và sửa như sau: Thêm type:Nodeport và thêm cổng nodeport:
   - ```
@@ -58,7 +58,7 @@
       - kubectl apply -f admin-user.yaml: chạy service account admin-user
       - kubectl get secreate -n kubenertes-dashboard: xem danh sách các servicem, copy tên của service admin-user vừa tạo (admin-user-token-xpwdc)
       - kubectl describe secret/admin-user-token-xpwdc -n kubernetes-dashboard: Xem thông tin cụ thể của secret admin-user và copy token. Sử dụng token này để đăng nhập vào kubernetes-dashboard
-- Kubectl
+## 3. Kubectl
   - Cấu trúc chung: 
     - kubectl [command] [type] [name] [flags]
     - command: là lênh, hành động như get, apply , delete, describe
@@ -66,7 +66,7 @@
     - name: tên đối tượng tác động
     - flags: các thiết lập tùy chỉnh
   - kubectl get no -o wide: xem thống tin của các node dạng cụ thể
-- Pod, node trong k8s
+## 4. Pod, node trong k8s
   - k8s bọc các containers với nhau trong một cấu trúc là pod. Các container cùng pod sẽ chia sẻ với nhau tài nguyên và mạng cục bộ của pod
   - pod là đơn vị nhỏ nhất để k8s thực hiện việc nhân bản
   - pod có nhiều container mà pod là đơn vị để scale nên nếu có thể thì cấu hình ứng dụng sao cho một pod có ít container nhất càng tốt
@@ -102,3 +102,46 @@
   - Xem mô tả của pod: kubectl describe po/[pod name]
   - Xem các sự kiện xảy ra trên cluster: kubectl get events
   - Xem thông tin file yaml của pod: kubectl get po/[pod name] -o yaml
+  - Để sửa thông tin của pod ví dụ sửa image, ta sử dụng lệnh: kubectl edit po/[pod_name], sau đó sửa nội dung file yaml và lưu lại. Cũng có thể sửa trên giao diện dashboard
+  - xem log của pod: kubectl logs po/[pod_name]
+  - Thực thi một lệnh trong po: kubectl exec po/[pod_name] -- [command]. Ex: kubectl exec po/ungdungnode -- ls /
+  - Truy cập vào giao diện dòng lệnh của po: kubectl exec -it [pod_name] -- bash. Trong trường hợp pod có nhiều container thì cần chỉ định rõ: kubectl exec -it [pod_name] -c [container] bash. Để thoát ra nhập exit và ấn enter
+  - Để truy cập vào ứng dụng, cần thông qua proxy: kubctl proxy. Nhập địa chỉ trên vào browser
+    - Để xem đường dẫn của ứng dụng: kubectl get po/[pod_name] -o yaml
+## 5. Pod có nhiều container
+- Khi chạy lệnh kubectl exec, thì mặc định sẽ chạy ở container được khai báo đầu tiên
+- Muốn chạy ở container được chỉ định: kubectl exec [pod_name] -c [container_name] -- command
+- Khi muốn chỉ đinh node cụ thể chạy pod, sử dụng thuộc tính nodeSelector, chỉ cần gán 
+  - xem mô tả của một node chỉ đinh: kubectl describe node/[node_name]
+  - Thông tin labels có dạng: kubernetes.io/hostname=minikube
+  - Gán gía trị trên cho thuộc tính nodeSelector:
+  - ```
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: minikube
+    ```
+- Xóa 1 loạt các pod: kubectl delete -f [folder chứa nhiều pod| file pod]
+
+## 6 Replicaset
+- Xem thông tin tất cả các loại dịch vụ: kubectl get all -o wide
+- Xem thông tin của replicaset: kubectl get rs -o wide
+- Xem manifest của rs: kubctl get rs -o yaml
+- Xem  chi tiết 1 replicaset: kubectl describe rs/[replicase_name]
+- Xem thông tin các pod theo nhãn: kubectl get po -l "app=rsapp"
+  - Xuất hiện thêm mục Controlled By: ReplicaSet/rsapp. 
+- Khi thực hiện delete 1 trong 2 pod của replicasSet, sẽ tự động tạo thêm replicas khác
+- Khi xóa tất cả pod cũng sẽ tự động tạo lại pod mới
+- Khi xóa replicaset thì các pod bên trong cũng sẽ bị xóa theo
+- Khi xóa nhãn của một pod, pod đó không còn sự quản lý của replicaset, nên nó sẽ tạo thêm 1 pod mới 
+  - Xóa label của pod: kubectl label pod/[pod_name] [tên nhãn]-
+  - Khi xóa replicaset, các pod nó quản lý sẽ bị xóa theo, nhưng cái pod đã xóa label vẫn tồn tại do không còn dưới sự quản lý của replicaset cũ nữa
+- Khi một pod đã chạy từ trước có nhãn mà replicas quản lý, thì khi replicaset được triển khai, pod đó sẽ được replicaset quản lý và chỉ tạo thêm n-1 pod còn lại. Và khi xóa replicaset thì tất cả các pod do nó quản lý sẽ bị xóa theo
+#### 6.1 Horizontal Pod AutoScaler (HPA): 
+- Cho phép thiết lập số lượng pod tối đa và tối thiểu của replicaset. Việc điều chỉnh số lượng pod sẽ dựa và traffic, lượng chịu tải của pod. Nếu traffic nhỏ thì tạo ít, traffic nhiều thì tạo đến tối đa
+- Tạo ra replicaset trước, sau đó là HPA
+- Khi muốn sửa HPA: sửa file yaml của hpa -> chạy apply để cập nhật lại
+## 7. Deployment
+- Xem liên tục: watch -n 1 kubectl get all -o wide
+- Deploy tạo ra các replicaset
+- Khi thực hiện sửa file yaml, chỉ cần chạy lại lệnh apply
+- Sau khi sửa và chạy lại, deployment sẽ tạo ra replicaset mới, và scale replicaset cũ về 0, và vẫn giữ replicaset này nhằm phục vụ cho việc rollback lại phiên bản cũ khi cần thiết
