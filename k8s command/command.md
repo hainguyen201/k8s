@@ -137,6 +137,7 @@
   - Khi xóa replicaset, các pod nó quản lý sẽ bị xóa theo, nhưng cái pod đã xóa label vẫn tồn tại do không còn dưới sự quản lý của replicaset cũ nữa
 - Khi một pod đã chạy từ trước có nhãn mà replicas quản lý, thì khi replicaset được triển khai, pod đó sẽ được replicaset quản lý và chỉ tạo thêm n-1 pod còn lại. Và khi xóa replicaset thì tất cả các pod do nó quản lý sẽ bị xóa theo
 #### 6.1 Horizontal Pod AutoScaler (HPA): 
+- Cần chạy replicaset trước, sau đó HPA sẽ tham chiếu đến replicaset đó thông qua metadata là name
 - Cho phép thiết lập số lượng pod tối đa và tối thiểu của replicaset. Việc điều chỉnh số lượng pod sẽ dựa và traffic, lượng chịu tải của pod. Nếu traffic nhỏ thì tạo ít, traffic nhiều thì tạo đến tối đa
 - Tạo ra replicaset trước, sau đó là HPA
 - Khi muốn sửa HPA: sửa file yaml của hpa -> chạy apply để cập nhật lại
@@ -145,3 +146,59 @@
 - Deploy tạo ra các replicaset
 - Khi thực hiện sửa file yaml, chỉ cần chạy lại lệnh apply
 - Sau khi sửa và chạy lại, deployment sẽ tạo ra replicaset mới, và scale replicaset cũ về 0, và vẫn giữ replicaset này nhằm phục vụ cho việc rollback lại phiên bản cũ khi cần thiết
+- Kiểm tra các lần cập nhật: kubectl rollout history  deploy/[deploy_name]
+- Xem thông tin chi tiết của lần cập nhật thứ n: kubectl rollout history  deploy/[deploy_name] --revision=n
+- Muốn quay lại bản cập nhật thứ n: kubectl rollout undo deploy/deployapp --to-revision=n
+- Scale deployment: kubectl scale deploy/deployapp --replicas=3
+- Scale tự đông, scale trong một khoảng: kubectl autoscale deploy/deployapp --min=4 --max=7
+- Lưu file yaml: kubectl get hpa/deployapp -o yaml > 2.hpa.yaml
+## 8. Service
+### metrics server
+- Giám sát tài nguyên của các pod trên  hệ thống
+- Tải về: https://github.com/kubernetes-sigs/metrics-server/releases/download/metrics-server-helm-chart-3.8.2/components.yaml
+- Sửa đối tham số args:
+- ```
+  args:
+    - --cert-dir=/tmp
+    - --secure-port=4443
+    - --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname
+    - --kubelet-use-node-status-port
+    - --kubelet-insecure-tls
+    - --metric-resolution=15s
+  ```
+- Apply file yaml
+- Kiểm tra tài nguyên các pod: kubectl top pod
+- Kiểm tra tài nguyên các node: kubectl top node
+### services:
+- Service là một đối tượng trừu tượng, nó xác đinh ra một nhóm các pod và chính sách để truy cập đến pod đó. Nhóm các pod mà service xác định thường dùng kỹ thuật selector (Chọn các pod của service theo label của pod)
+- Có thể hiểu service là dịch vụ mạng, tạo cơ chế cân bằng tải truy cập đến điểm cuối mà service đó phục vụ
+- Khi client gửi request đến service theo ip thì nó sẽ tự điều phối tới các pod tương ứng
+- Khi trên hệ thống có cùng tên vs service thì serivce sẽ lấy endpoint đó làm của nó.
+- Service gần giống proxy.
+### Secret tls
+- openssl req -nodes -newkey rsa:2048 -keyout tls.key  -out ca.csr -subj "/CN=xuanthulab.net"
+- openssl x509 -req -sha256 -days 365 -in ca.csr -signkey tls.key -out tls.crt
+- kubectl create secret tls secret-nginx-cert --cert=certs/tls.crt  --key=certs/tls.key
+## DeamonSet
+- Đảm bảo chạy trên mỗi node một bản copy của pod. Triển khai DeamonSet khi cần ở mỗi máy (node) một pod, thường dùng cho các ứng dụng như thu thập log, tạo ổ đĩa trên mỗi node
+- Bình thường node master sẽ không được phép chạy các pod
+- Để xóa: kubetl taint node [node_name] node-role.kubernetes.io/master-
+## Job
+- Có chức năng tạo pod đảm bảo nó chạy và kết thúc thành công. Khi các pod do job tạo và kết thúc thành công thì job hoàn thành. 
+- Khi xóa job thì các pod tạo ra cũng xóa theo. 
+- Một job có thể tạo ra các pod chạy tuần tự hoặc song song. 
+- Sử dụng job khi muốn thi hành một vài chức năng hoàn thành xong thì dừng (ví dụ backup, kiểm tra,...)
+- Khi Job tạo pod, Pod chưa hoàn thành nếu Pod bị xóa, lỗi node,.. sẽ thực hiện tạo Pod khác để thi hành tác vụ
+```
+  # Số lần chạy POD thành công
+  completions: 10
+  # Số lần tạo chạy lại POD bị lỗi, trước khi đánh dấu job thất bại
+  backoffLimit: 3
+  # Số POD chạy song song
+  parallelism: 2
+  # Số giây tối đa của JOB, quá thời hạn trên hệ thống ngắt JOB
+  activeDeadlineSeconds: 120
+
+```
+## cronjob
+- Chạy các job theo một lịch định sẵn. Việc khai báo giống Cron của linux

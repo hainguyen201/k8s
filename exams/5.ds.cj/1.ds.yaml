@@ -1,23 +1,22 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: DaemonSet
 metadata:
-  name: deployapp
+  name: dsapp
 spec:
-  replicas: 2
   selector:
     matchLabels:
-      app: deployapp
+      app: ds-nginx
   template:
     metadata:
       labels:
-        app: deployapp
+        app: ds-nginx
     spec:
       containers:
-      - name: node
+      - name: nginx
         image: nginx
         resources:
           limits:
             memory: "128Mi"
             cpu: "100m"
         ports:
-        - containerPort: 8085
+        - containerPort: 80
