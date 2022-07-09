@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv1
+  labels:
+    name: pv1
+spec:
+  storageClassName: mystorageclass
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce 
+    # Readwriteonce: volume có thể được sử dụng read-write bởi 1 node
+    # ReadWOnlyMany: volume có thể read-only bởi nhiều node
+    # ReadWriteMany: volume có thể read-write bởi nhiều node
+  hostPath:
+    path: "/v1"

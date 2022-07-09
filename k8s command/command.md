@@ -56,7 +56,7 @@
       - Tạo file admin-user.yaml có nội dung:
       - 
       - kubectl apply -f admin-user.yaml: chạy service account admin-user
-      - kubectl get secreate -n kubenertes-dashboard: xem danh sách các servicem, copy tên của service admin-user vừa tạo (admin-user-token-xpwdc)
+      - kubectl get secrete -n kubenertes-dashboard: xem danh sách các servicem, copy tên của service admin-user vừa tạo (admin-user-token-xpwdc)
       - kubectl describe secret/admin-user-token-xpwdc -n kubernetes-dashboard: Xem thông tin cụ thể của secret admin-user và copy token. Sử dụng token này để đăng nhập vào kubernetes-dashboard
 ## 3. Kubectl
   - Cấu trúc chung: 
@@ -153,7 +153,7 @@
 - Scale tự đông, scale trong một khoảng: kubectl autoscale deploy/deployapp --min=4 --max=7
 - Lưu file yaml: kubectl get hpa/deployapp -o yaml > 2.hpa.yaml
 ## 8. Service
-### metrics server
+### 8.1 metrics server
 - Giám sát tài nguyên của các pod trên  hệ thống
 - Tải về: https://github.com/kubernetes-sigs/metrics-server/releases/download/metrics-server-helm-chart-3.8.2/components.yaml
 - Sửa đối tham số args:
@@ -169,21 +169,21 @@
 - Apply file yaml
 - Kiểm tra tài nguyên các pod: kubectl top pod
 - Kiểm tra tài nguyên các node: kubectl top node
-### services:
+### 8.2 services:
 - Service là một đối tượng trừu tượng, nó xác đinh ra một nhóm các pod và chính sách để truy cập đến pod đó. Nhóm các pod mà service xác định thường dùng kỹ thuật selector (Chọn các pod của service theo label của pod)
 - Có thể hiểu service là dịch vụ mạng, tạo cơ chế cân bằng tải truy cập đến điểm cuối mà service đó phục vụ
 - Khi client gửi request đến service theo ip thì nó sẽ tự điều phối tới các pod tương ứng
 - Khi trên hệ thống có cùng tên vs service thì serivce sẽ lấy endpoint đó làm của nó.
 - Service gần giống proxy.
-### Secret tls
+### 8.3 Secret tls
 - openssl req -nodes -newkey rsa:2048 -keyout tls.key  -out ca.csr -subj "/CN=xuanthulab.net"
 - openssl x509 -req -sha256 -days 365 -in ca.csr -signkey tls.key -out tls.crt
 - kubectl create secret tls secret-nginx-cert --cert=certs/tls.crt  --key=certs/tls.key
-## DeamonSet
+## 9. DeamonSet
 - Đảm bảo chạy trên mỗi node một bản copy của pod. Triển khai DeamonSet khi cần ở mỗi máy (node) một pod, thường dùng cho các ứng dụng như thu thập log, tạo ổ đĩa trên mỗi node
 - Bình thường node master sẽ không được phép chạy các pod
-- Để xóa: kubetl taint node [node_name] node-role.kubernetes.io/master-
-## Job
+- Để xóa: kubectl taint node master.xtl node-role.kubernetes.io/control-plane-
+## 10. Job
 - Có chức năng tạo pod đảm bảo nó chạy và kết thúc thành công. Khi các pod do job tạo và kết thúc thành công thì job hoàn thành. 
 - Khi xóa job thì các pod tạo ra cũng xóa theo. 
 - Một job có thể tạo ra các pod chạy tuần tự hoặc song song. 
@@ -200,5 +200,21 @@
   activeDeadlineSeconds: 120
 
 ```
-## cronjob
+## 11. Cronjob
 - Chạy các job theo một lịch định sẵn. Việc khai báo giống Cron của linux
+## 12. Persistent Volume
+- Là một phần không gian lưu trữ dữ liệu trong cluster, các persistentVolume giống với volume bình thường tuy nhiên nó tồn tại độc lập với pod (pod bị xóa nhưng PV vẫn tồn tại), có nhiều loại PersistentVolume có thể triển khai như NFS, Clusterfs
+- PersistentVolumeClaim (pvc) là yêu cầu sử dụng không gian lưu trữ (sử dụng PV). Hình dung PV giống như Node, PVC giống như POD. POD chạy nó sử dụng các tài nguyên của NODE, PVC hoạt động nó sử dụng tài nguyên của PV.
+- Câu hỏi: Các PV có cùng classname được không? khi đó thì khi claim sẽ xảy ra hiện tượng gì?
+- Khi một pvc được tạo vào gắn vào pv, khi xóa pvc đi và tạo lại, cần chỉnh sửa file manifest của pv:
+  - Lúc này pv đang ở trạng thái ```Released```
+  - kubectl edit pv/[pv_name]
+  - Xóa phần toàn bộ phần thuộc tính claimRef
+  - Sau khi edit, pv chuyển sang trạng thái ```Available```
+  - Khi đó có thể gắn kết lại pvc với pv
+### NFS
+- Sử dụng volume để các pod cũng một dữ liệu, cần một loại đĩa mạng
+- Ta sẽ cài một server NFS trực tiếp trên một node của k8s (độc lập, không chạy pod, nếu muốn có thể cài trên một máy khác chuyên chia sẻ file)
+## Ingress
+- Tiếp nhận yêu cầu dạng http, https vào các dịch vụ bên trong cluster
+### HA Proxy Ingress

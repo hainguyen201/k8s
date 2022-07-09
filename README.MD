@@ -1,6 +1,6 @@
 K01
 - Khởi tạo một k8s cluster: 
- - ```kubeadm init --apiserver-advertise-address=192.168.56.2 --pod-network-cidr=192.168.0.0/16 --cri-socket=unix:///var/run/containerd/containerd.sock```
+ - ```kubeadm init --apiserver-advertise-address=192.168.56.2 --pod-network-cidr=192.168.0.0/16 --cri-socket=/var/run/cri-dockerd.sock```
  - ```mkdir -p $HOME/.kube```
  - ```sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config```
  - ```sudo chown $(id -u):$(id -g) $HOME/.kube/config```
@@ -49,4 +49,5 @@ K02: K8s dashboard
     #   namespace: kubernetes-dashboard
     # type: Opaque
   ```
-  - 
+
+export KUBECONFIG=/home/hainv/.kube/config-mycluster

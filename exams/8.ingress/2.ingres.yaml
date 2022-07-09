@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: app
+  namespace: ingress-controller
+spec:
+  rules:
+    # Tên miền truy cập
+  - host: hainv.test
+    http:
+      paths:
+      - backend:
+          # dịch vụ phục vụ tương ứng với tên miền và path
+          service:
+            name: http-test-svc
+            port: 
+              number: 80
+        pathType: Prefix
+        path: /
