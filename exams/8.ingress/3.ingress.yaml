@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    haproxy-ingress.github.io/balance-algorithm: roundrobin
+    haproxy-ingress.github.io/blue-green-deploy: group=blue=1,group=green=1
+    haproxy-ingress.github.io/blue-green-mode: pod
+    haproxy-ingress.github.io/ssl-redirect: "false"
+  name: http-test-svc
+  namespace: ingress-controller
+spec:
+  rules:
+  - host: hainv.test
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: http-test-svc
+            port:
+              number: 80
